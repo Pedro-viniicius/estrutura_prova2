@@ -1,0 +1,1401 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Guia de Estudos — Grafos</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --fundo: #f6f7f9;
+      --painel: #ffffff;
+      --texto: #17202a;
+      --muted: #5d6b78;
+      --linha: #d9e0e7;
+      --azul: #1b66c9;
+      --verde: #168a5b;
+      --vinho: #9d2c4d;
+      --amarelo: #f7c948;
+      --sombra: 0 10px 28px rgba(23, 32, 42, 0.08);
+      --raio: 8px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--fundo);
+      color: var(--texto);
+      line-height: 1.58;
+    }
+
+    a { color: var(--azul); }
+
+    .layout {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px 18px 64px;
+    }
+
+    header.hero {
+      background: linear-gradient(135deg, #123a63, #1d6f72);
+      color: #fff;
+      border-radius: var(--raio);
+      padding: clamp(28px, 5vw, 54px);
+      box-shadow: var(--sombra);
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      font-size: 0.88rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      opacity: 0.86;
+    }
+
+    h1, h2, h3, h4 {
+      line-height: 1.18;
+      margin: 0 0 12px;
+    }
+
+    h1 { font-size: clamp(2rem, 5vw, 4rem); }
+    h2 { font-size: clamp(1.55rem, 3vw, 2.2rem); }
+    h3 { font-size: 1.18rem; margin-top: 18px; }
+    h4 { font-size: 1rem; margin-top: 14px; }
+
+    .hero p {
+      max-width: 820px;
+      font-size: 1.06rem;
+      margin: 0 0 16px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .hero-box {
+      border: 1px solid rgba(255,255,255,0.24);
+      background: rgba(255,255,255,0.1);
+      border-radius: var(--raio);
+      padding: 14px;
+    }
+
+    .hero-box strong { display: block; margin-bottom: 6px; }
+
+    nav.sumario {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      margin: 18px 0;
+      background: rgba(255,255,255,0.96);
+      border: 1px solid var(--linha);
+      border-radius: var(--raio);
+      box-shadow: 0 5px 18px rgba(23, 32, 42, 0.06);
+      padding: 12px;
+    }
+
+    nav.sumario ul {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    nav.sumario a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #eef4fb;
+      color: #154d8e;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.88rem;
+    }
+
+    section {
+      background: var(--painel);
+      border: 1px solid var(--linha);
+      border-radius: var(--raio);
+      box-shadow: var(--sombra);
+      padding: clamp(20px, 3vw, 34px);
+      margin: 18px 0;
+      scroll-margin-top: 92px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: start;
+      border-bottom: 1px solid var(--linha);
+      padding-bottom: 14px;
+      margin-bottom: 18px;
+    }
+
+    .concluido {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      white-space: nowrap;
+      color: var(--muted);
+      font-size: 0.92rem;
+      user-select: none;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      border: 1px solid var(--linha);
+      border-radius: var(--raio);
+      background: #fff;
+      padding: 16px;
+    }
+
+    .destaque {
+      border-left: 5px solid var(--azul);
+      background: #eef6ff;
+      padding: 14px 16px;
+      border-radius: 0 var(--raio) var(--raio) 0;
+      margin: 14px 0;
+    }
+
+    .alerta {
+      border-left-color: var(--vinho);
+      background: #fff1f4;
+    }
+
+    .sucesso {
+      border-left-color: var(--verde);
+      background: #eefaf5;
+    }
+
+    .tag {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      background: #edf1f6;
+      color: #334155;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+
+    .tag.basica { background: #e9f8ef; color: #12653f; }
+    .tag.intermediaria { background: #fff6d7; color: #745a00; }
+    .tag.avancada { background: #ffe8ee; color: #84213d; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      border: 1px solid var(--linha);
+      padding: 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #edf3f8;
+      color: #1d3348;
+    }
+
+    code, pre {
+      font-family: Consolas, Monaco, "Courier New", monospace;
+    }
+
+    pre {
+      background: #101820;
+      color: #f6f8fa;
+      padding: 14px;
+      border-radius: var(--raio);
+      overflow-x: auto;
+      line-height: 1.45;
+    }
+
+    .mapa {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(130px, 1fr));
+      gap: 12px;
+      align-items: stretch;
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+
+    .no {
+      position: relative;
+      min-height: 128px;
+      border: 1px solid var(--linha);
+      border-top: 5px solid var(--azul);
+      border-radius: var(--raio);
+      background: #ffffff;
+      padding: 14px;
+      min-width: 130px;
+    }
+
+    .no:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      right: -13px;
+      top: 44%;
+      color: var(--azul);
+      font-weight: 900;
+      background: var(--painel);
+      width: 18px;
+      text-align: center;
+    }
+
+    .no strong { display: block; margin-bottom: 7px; color: #113b68; }
+
+    .glossario {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .termo {
+      border: 1px solid var(--linha);
+      border-radius: var(--raio);
+      padding: 12px;
+      background: #fbfcfe;
+    }
+
+    .termo strong {
+      display: block;
+      color: #123a63;
+      margin-bottom: 4px;
+    }
+
+    .flash-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .flashcard {
+      min-height: 176px;
+      border: 1px solid var(--linha);
+      border-radius: var(--raio);
+      background: #fff;
+      padding: 0;
+      cursor: pointer;
+      perspective: 1000px;
+    }
+
+    .flash-inner {
+      min-height: 176px;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.35s ease;
+    }
+
+    .flashcard.virado .flash-inner { transform: rotateY(180deg); }
+
+    .frente, .verso {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 14px;
+      border-radius: var(--raio);
+    }
+
+    .frente {
+      background: #f8fbff;
+      border-top: 4px solid var(--azul);
+    }
+
+    .verso {
+      transform: rotateY(180deg);
+      background: #f0fbf6;
+      border-top: 4px solid var(--verde);
+    }
+
+    .flashcard small { color: var(--muted); font-weight: 700; }
+
+    .questao {
+      border: 1px solid var(--linha);
+      border-radius: var(--raio);
+      padding: 16px;
+      margin: 12px 0;
+      background: #fff;
+    }
+
+    .questao ol {
+      margin-bottom: 0;
+      padding-left: 22px;
+    }
+
+    .questao li { margin: 5px 0; }
+
+    .botao {
+      border: 0;
+      border-radius: 7px;
+      background: var(--azul);
+      color: #fff;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      margin: 8px 8px 8px 0;
+    }
+
+    .botao.secundario {
+      background: #e8eef5;
+      color: #17324d;
+    }
+
+    .resposta, .painel-oculto {
+      display: none;
+      border: 1px solid var(--linha);
+      border-radius: var(--raio);
+      background: #fbfcfe;
+      padding: 14px;
+      margin-top: 10px;
+    }
+
+    .resposta.aberta, .painel-oculto.aberto { display: block; }
+
+    .cronograma {
+      border-left: 3px solid var(--azul);
+      padding-left: 16px;
+    }
+
+    .aula {
+      margin: 0 0 14px;
+      padding: 12px 14px;
+      border: 1px solid var(--linha);
+      border-radius: var(--raio);
+      background: #fbfcfe;
+    }
+
+    .checklist {
+      columns: 2;
+      column-gap: 32px;
+      padding-left: 20px;
+    }
+
+    .progresso {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 14px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    progress {
+      width: min(320px, 100%);
+      height: 12px;
+      accent-color: var(--verde);
+    }
+
+    footer {
+      color: var(--muted);
+      text-align: center;
+      padding: 24px 0 0;
+      font-size: 0.92rem;
+    }
+
+    @media (max-width: 920px) {
+      .hero-grid, .grid-3, .grid, .flash-grid, .glossario {
+        grid-template-columns: 1fr;
+      }
+
+      nav.sumario { position: static; }
+      .section-head { flex-direction: column; }
+      .checklist { columns: 1; }
+      .flash-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 560px) {
+      .layout { padding: 14px 10px 48px; }
+      section { padding: 18px 14px; }
+      .flash-grid { grid-template-columns: 1fr; }
+      .hero-grid { gap: 10px; }
+      nav.sumario a { width: 100%; justify-content: center; }
+      nav.sumario li { flex: 1 1 100%; }
+      table { font-size: 0.86rem; }
+    }
+
+    @media print {
+      body { background: #fff; color: #000; }
+      .layout { max-width: none; padding: 0; }
+      nav.sumario, .botao, .concluido, .progresso { display: none !important; }
+      header.hero, section {
+        box-shadow: none;
+        border: 1px solid #aaa;
+        break-inside: avoid;
+      }
+      header.hero {
+        background: #fff !important;
+        color: #000 !important;
+      }
+      .resposta, .painel-oculto { display: block !important; }
+      .flash-grid { grid-template-columns: repeat(2, 1fr); }
+      .flashcard, .flash-inner { min-height: 130px; }
+      .frente, .verso {
+        position: static;
+        transform: none;
+        backface-visibility: visible;
+        border: 1px solid #bbb;
+        margin-bottom: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <header class="hero" id="topo">
+      <p class="eyebrow">Estruturas de Dados II</p>
+      <h1>Guia de Estudos — Grafos</h1>
+      <p>Este guia organiza os principais conceitos de grafos para revisão ativa: modelagem, representações, consultas básicas, BFS, DFS, componentes conexas, ciclos, DAGs e ordenação topológica.</p>
+      <div class="hero-grid">
+        <div class="hero-box">
+          <strong>Objetivos</strong>
+          Dominar a linguagem de grafos, escolher representações adequadas e executar algoritmos clássicos.
+        </div>
+        <div class="hero-box">
+          <strong>Uso recomendado</strong>
+          Leia o resumo, vire flashcards, resolva as questões e só então abra o gabarito.
+        </div>
+        <div class="hero-box">
+          <strong>Foco de prova</strong>
+          Menor caminho sem pesos com BFS, ciclos com DFS, componentes e ordenações válidas.
+        </div>
+      </div>
+    </header>
+
+    <nav class="sumario" aria-label="Sumário">
+      <ul>
+        <li><a href="#resumo">Resumo</a></li>
+        <li><a href="#mapa">Mapa visual</a></li>
+        <li><a href="#glossario">Glossário</a></li>
+        <li><a href="#flashcards">Flashcards</a></li>
+        <li><a href="#questoes">Questões</a></li>
+        <li><a href="#simulado">Mini-simulado</a></li>
+        <li><a href="#laboratorios">Laboratórios</a></li>
+        <li><a href="#revisao">Revisão final</a></li>
+        <li><a href="#gabarito">Gabarito</a></li>
+      </ul>
+      <div class="progresso">
+        <span>Progresso:</span>
+        <progress id="barraProgresso" value="0" max="9"></progress>
+        <span id="textoProgresso">0 de 9 seções</span>
+      </div>
+    </nav>
+
+    <section id="intro">
+      <div class="section-head">
+        <div>
+          <h2>Capa / Introdução</h2>
+          <p>O estudo de grafos muda a forma de pensar estruturas de dados: em vez de uma sequência linear ou de uma hierarquia simples, modelamos relações gerais, com múltiplos caminhos, ciclos e partes desconectadas.</p>
+        </div>
+        <label class="concluido"><input type="checkbox" data-section="intro"> seção concluída</label>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <h3>O que você deve aprender</h3>
+          <ul>
+            <li>Definir vértices, arestas, graus, caminhos, ciclos e conectividade.</li>
+            <li>Diferenciar grafo direcionado, não direcionado, ponderado e não ponderado.</li>
+            <li>Comparar matriz, lista de adjacência e lista de arestas.</li>
+            <li>Aplicar BFS, DFS, componentes conexas e ordenação topológica.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Como usar esta página</h3>
+          <ol>
+            <li>Comece pelo resumo e pelo mapa visual.</li>
+            <li>Teste definições nos flashcards.</li>
+            <li>Resolva as questões sem olhar o gabarito.</li>
+            <li>Faça os laboratórios com papel, pseudocódigo ou uma linguagem de sua escolha.</li>
+          </ol>
+        </div>
+      </div>
+      <div class="destaque">
+        <strong>Ideia central:</strong> BFS e DFS são percursos. A partir deles, resolvemos alcance, menor caminho sem pesos, componentes, ciclos e ordenações de dependências.
+      </div>
+    </section>
+
+    <section id="resumo">
+      <div class="section-head">
+        <div>
+          <h2>Resumo da Matéria</h2>
+          <p>Organizado pela sequência das aulas de 06/04/2026 a 27/04/2026.</p>
+        </div>
+        <label class="concluido"><input type="checkbox" data-section="resumo"> seção concluída</label>
+      </div>
+
+      <div class="cronograma">
+        <div class="aula"><strong>Aula 9 — 06/04/2026:</strong> conceitos básicos, grafo como TAD, leitura de instâncias, vizinhança, grau, densidade e consultas básicas.</div>
+        <div class="aula"><strong>Aula 10 — 10/04/2026:</strong> BFS, aplicações, menor caminho em grafo não ponderado, predecessores e reconstrução de caminho.</div>
+        <div class="aula"><strong>Aula 11 — 13/04/2026:</strong> laboratório de BFS com distâncias e caminhos, introdução ao DFS, pilha, recursão, descoberta e finalização.</div>
+        <div class="aula"><strong>Aula 12 — 17/04/2026:</strong> DFS na prática, detecção de ciclos em dígrafos, estados branco, cinza e preto.</div>
+        <div class="aula"><strong>Aula 13 — 20/04/2026:</strong> componentes conexas, DAGs, intuição da ordenação topológica e aplicações.</div>
+        <div class="aula"><strong>Aula 14 — 24/04/2026:</strong> ordenação topológica com Kahn e DFS, validação e casos de erro com ciclo.</div>
+        <div class="aula"><strong>Aula 15 — 27/04/2026:</strong> revisão geral, exercícios integradores e mini-simulado.</div>
+      </div>
+
+      <h3>Conceitos básicos</h3>
+      <p>Um grafo é um par <strong>G = (V, E)</strong>: <strong>V</strong> é o conjunto de vértices e <strong>E</strong> é o conjunto de arestas. Vértices representam entidades; arestas representam relações. Em um mapa, vértices podem ser cidades e arestas podem ser estradas. Em uma disciplina, vértices podem ser tarefas e arestas podem ser dependências.</p>
+      <p>Em grafos não direcionados, a aresta <strong>{u, v}</strong> funciona nos dois sentidos. Em dígrafos, a aresta <strong>u → v</strong> tem sentido. Em grafos ponderados, cada aresta tem custo; em grafos não ponderados, todas as arestas são tratadas como equivalentes.</p>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Grau, vizinhança e densidade</h3>
+          <p>A vizinhança de um vértice é o conjunto de vértices diretamente conectados a ele. Em grafo não direcionado, o grau é o número de arestas incidentes. Em dígrafos, separamos grau de entrada e grau de saída.</p>
+          <p>A densidade indica quão perto o grafo está do máximo de arestas possível. Para grafo simples não direcionado, o máximo é <strong>n(n − 1) / 2</strong>.</p>
+        </div>
+        <div class="card">
+          <h3>Consultas básicas</h3>
+          <p>Perguntas comuns: existe a aresta entre dois vértices? Quais são os vizinhos de um vértice? Qual é seu grau? Existe caminho entre dois vértices? O grafo é conexo?</p>
+          <p>Essas consultas dependem fortemente da representação escolhida.</p>
+        </div>
+      </div>
+
+      <h3>Representações e comparações</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Representação</th>
+            <th>Memória</th>
+            <th>Teste de aresta</th>
+            <th>Percorrer vizinhos</th>
+            <th>Quando usar</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Matriz de adjacência</td>
+            <td>O(V²)</td>
+            <td>O(1)</td>
+            <td>O(V)</td>
+            <td>Grafos densos ou muitas consultas de existência de aresta.</td>
+          </tr>
+          <tr>
+            <td>Lista de adjacência</td>
+            <td>O(V + E)</td>
+            <td>O(grau(v)) no caso simples</td>
+            <td>O(grau(v))</td>
+            <td>Grafos esparsos, comuns em aplicações reais.</td>
+          </tr>
+          <tr>
+            <td>Lista de arestas</td>
+            <td>O(E)</td>
+            <td>O(E)</td>
+            <td>O(E), se não houver índice auxiliar</td>
+            <td>Leitura simples de entrada, algoritmos que processam arestas diretamente.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="destaque alerta">
+        <strong>Erro comum:</strong> dizer que BFS sempre encontra o menor caminho. A frase correta é: BFS encontra menor caminho em número de arestas em grafos não ponderados. Com pesos diferentes, o custo mínimo pode exigir outro algoritmo.
+      </div>
+
+      <h3>Grafo como TAD e leitura de instâncias</h3>
+      <p>Um TAD de grafo deve esconder a estrutura interna e oferecer operações claras: criar grafo, adicionar aresta, listar vizinhos, consultar grau, executar percursos e validar vértices. Na leitura de instâncias, é comum receber primeiro <strong>n</strong> e <strong>m</strong>, depois <strong>m</strong> pares ou trios representando arestas.</p>
+      <pre><code>criar_grafo(n, direcionado)
+para i de 1 até m:
+  ler u, v
+  adicionar_aresta(u, v)
+  se o grafo não for direcionado:
+    adicionar_aresta(v, u)</code></pre>
+
+      <h3>BFS</h3>
+      <p>A BFS, ou busca em largura, explora o grafo por camadas a partir de uma origem. Ela usa fila. Primeiro vem a origem, depois os vizinhos diretos, depois os vértices a duas arestas, e assim por diante.</p>
+      <pre><code>BFS(origem):
+  marcar origem como visitada
+  distância[origem] ← 0
+  predecessor[origem] ← vazio
+  colocar origem na fila
+  enquanto a fila não estiver vazia:
+    v ← remover da fila
+    para cada vizinho w de v:
+      se w não foi visitado:
+        marcar w como visitado
+        distância[w] ← distância[v] + 1
+        predecessor[w] ← v
+        colocar w na fila</code></pre>
+      <p>Para reconstruir caminho, volte pelo vetor de predecessores desde o destino até a origem e depois inverta a sequência.</p>
+
+      <h3>DFS</h3>
+      <p>A DFS, ou busca em profundidade, tenta ir o mais longe possível antes de retornar. Ela pode usar recursão ou pilha explícita. É muito útil para ciclos, componentes, tempos de descoberta e finalização.</p>
+      <pre><code>DFS(v):
+  cor[v] ← cinza
+  tempo_descoberta[v] ← próximo_tempo
+  para cada vizinho w de v:
+    se cor[w] = branco:
+      predecessor[w] ← v
+      DFS(w)
+    se cor[w] = cinza:
+      há ciclo em dígrafo
+  cor[v] ← preto
+  tempo_finalização[v] ← próximo_tempo</code></pre>
+
+      <h3>Componentes, ciclos, DAG e topologia</h3>
+      <p>Em grafo não direcionado, uma componente conexa é uma “ilha” máxima de vértices alcançáveis entre si. Para contar componentes, percorra todos os vértices e inicie BFS ou DFS sempre que encontrar um vértice ainda não visitado.</p>
+      <p>Em dígrafos, a presença de uma aresta para um vértice cinza durante DFS indica ciclo dirigido. Um DAG é um dígrafo acíclico. DAGs admitem ordenação topológica: uma ordem dos vértices em que toda aresta <strong>u → v</strong> coloca <strong>u</strong> antes de <strong>v</strong>.</p>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Kahn</h3>
+          <p>Calcula graus de entrada, coloca todos os vértices com grau de entrada zero em uma fila, remove vértices e diminui o grau de entrada dos sucessores. Se ao final nem todos foram removidos, existe ciclo.</p>
+        </div>
+        <div class="card">
+          <h3>Toposort com DFS</h3>
+          <p>Executa DFS e adiciona cada vértice à resposta quando ele finaliza. A ordem topológica é a ordem reversa dos tempos de finalização. Se aparecer ciclo, a ordenação é inválida.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="mapa">
+      <div class="section-head">
+        <div>
+          <h2>Mapa Visual da Cadeia de Ideias</h2>
+          <p>Siga da esquerda para a direita: cada bloco depende das ideias anteriores.</p>
+        </div>
+        <label class="concluido"><input type="checkbox" data-section="mapa"> seção concluída</label>
+      </div>
+      <div class="mapa" aria-label="Mapa visual de conceitos de grafos">
+        <div class="no"><strong>Conceitos básicos</strong>Vértice, aresta, grau, vizinhança, caminho, ciclo e conectividade.</div>
+        <div class="no"><strong>Representações</strong>Matriz, lista de adjacência, lista de arestas, custos de memória e consulta.</div>
+        <div class="no"><strong>BFS / DFS</strong>Fila para camadas; pilha ou recursão para profundidade.</div>
+        <div class="no"><strong>Componentes / ciclos</strong>Ilhas em grafos não direcionados; ciclo dirigido detectado por vértice cinza.</div>
+        <div class="no"><strong>DAG</strong>Dígrafo sem ciclos, usado para dependências e precedências.</div>
+        <div class="no"><strong>Ordenação topológica</strong>Kahn ou DFS geram uma ordem válida quando não há ciclo.</div>
+        <div class="no"><strong>Revisão integradora</strong>Escolher representação, executar percurso, justificar complexidade e validar casos de erro.</div>
+      </div>
+    </section>
+
+    <section id="glossario">
+      <div class="section-head">
+        <div>
+          <h2>Glossário</h2>
+          <p>Termos essenciais para responder questões teóricas e interpretar enunciados.</p>
+        </div>
+        <label class="concluido"><input type="checkbox" data-section="glossario"> seção concluída</label>
+      </div>
+      <div class="glossario">
+        <div class="termo"><strong>Grafo</strong>Estrutura formada por vértices e arestas, usada para modelar relações.</div>
+        <div class="termo"><strong>Vértice</strong>Entidade ou nó do grafo.</div>
+        <div class="termo"><strong>Aresta</strong>Conexão entre dois vértices.</div>
+        <div class="termo"><strong>Grau</strong>Número de arestas incidentes em um vértice; em dígrafos, há grau de entrada e de saída.</div>
+        <div class="termo"><strong>Vizinhança</strong>Conjunto de vértices adjacentes a um vértice.</div>
+        <div class="termo"><strong>Caminho</strong>Sequência de vértices ligados por arestas consecutivas.</div>
+        <div class="termo"><strong>Ciclo</strong>Caminho que começa e termina no mesmo vértice, sem depender de repetir todo o percurso.</div>
+        <div class="termo"><strong>Conectividade</strong>Capacidade de alcançar vértices por caminhos no grafo.</div>
+        <div class="termo"><strong>Componente conexa</strong>Conjunto máximo de vértices mutuamente alcançáveis em grafo não direcionado.</div>
+        <div class="termo"><strong>Grafo direcionado</strong>Grafo cujas arestas têm sentido, como u → v.</div>
+        <div class="termo"><strong>Grafo ponderado</strong>Grafo com peso, custo, distância ou tempo associado às arestas.</div>
+        <div class="termo"><strong>Lista de adjacência</strong>Representação que guarda, para cada vértice, sua lista de vizinhos.</div>
+        <div class="termo"><strong>Matriz de adjacência</strong>Matriz V × V que registra se existe aresta entre pares de vértices.</div>
+        <div class="termo"><strong>BFS</strong>Busca em largura; usa fila e percorre por camadas.</div>
+        <div class="termo"><strong>DFS</strong>Busca em profundidade; usa pilha ou recursão e aprofunda caminhos.</div>
+        <div class="termo"><strong>Predecessor</strong>Vértice anterior no caminho descoberto por um percurso.</div>
+        <div class="termo"><strong>Distância</strong>Em grafo não ponderado com BFS, é o menor número de arestas desde a origem.</div>
+        <div class="termo"><strong>DAG</strong>Dígrafo acíclico, isto é, grafo direcionado sem ciclos dirigidos.</div>
+        <div class="termo"><strong>Ordenação topológica</strong>Ordem dos vértices de um DAG em que cada dependência aparece antes de quem depende dela.</div>
+        <div class="termo"><strong>Algoritmo de Kahn</strong>Método de ordenação topológica baseado em graus de entrada e fila de vértices sem predecessores pendentes.</div>
+      </div>
+    </section>
+
+    <section id="flashcards">
+      <div class="section-head">
+        <div>
+          <h2>Flashcards Interativos</h2>
+          <p>Clique em um cartão para virar. Use para lembrança ativa antes das questões.</p>
+        </div>
+        <label class="concluido"><input type="checkbox" data-section="flashcards"> seção concluída</label>
+      </div>
+      <button class="botao secundario" type="button" id="resetFlashcards">Desvirar cartões</button>
+      <div class="flash-grid" id="listaFlashcards"></div>
+    </section>
+
+    <section id="questoes">
+      <div class="section-head">
+        <div>
+          <h2>Questões de Treino</h2>
+          <p>Resolva antes de abrir o gabarito. As questões combinam itens adaptados da lista de estudos local e itens complementares de BFS, DFS e topologia.</p>
+        </div>
+        <label class="concluido"><input type="checkbox" data-section="questoes"> seção concluída</label>
+      </div>
+
+      <div class="questao">
+        <span class="tag basica">Básica</span>
+        <strong>1. Um grafo é formado por:</strong>
+        <ol type="A">
+          <li>vértices e arestas.</li>
+          <li>pilhas e filas.</li>
+          <li>chaves e valores.</li>
+          <li>vetores ordenados.</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <span class="tag basica">Básica</span>
+        <strong>2. Em um grafo não direcionado, a aresta 2 − 5 indica:</strong>
+        <ol type="A">
+          <li>conexão apenas de 2 para 5.</li>
+          <li>conexão apenas de 5 para 2.</li>
+          <li>conexão nos dois sentidos.</li>
+          <li>ausência de caminho entre 2 e 5.</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <span class="tag basica">Básica</span>
+        <strong>3. Em um dígrafo, a aresta A → B significa que:</strong>
+        <ol type="A">
+          <li>A aponta para B.</li>
+          <li>B aponta obrigatoriamente para A.</li>
+          <li>A e B estão em componentes diferentes.</li>
+          <li>o grafo é necessariamente acíclico.</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <span class="tag intermediaria">Intermediária</span>
+        <strong>4. Considere o grafo não direcionado com arestas 0−1, 0−2, 1−3, 2−3 e 3−4. Qual é a vizinhança de 3?</strong>
+        <ol type="A">
+          <li>{0, 1, 2}</li>
+          <li>{1, 2, 4}</li>
+          <li>{0, 4}</li>
+          <li>{3, 4}</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <span class="tag intermediaria">Intermediária</span>
+        <strong>5. No mesmo grafo da questão 4, qual é o grau do vértice 0?</strong>
+        <ol type="A">
+          <li>1</li>
+          <li>2</li>
+          <li>3</li>
+          <li>4</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <span class="tag intermediaria">Intermediária</span>
+        <strong>6. Um grafo simples não direcionado com 5 vértices possui no máximo quantas arestas?</strong>
+        <ol type="A">
+          <li>5</li>
+          <li>8</li>
+          <li>10</li>
+          <li>20</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <span class="tag intermediaria">Intermediária</span>
+        <strong>7. Se um grafo simples não direcionado tem 5 vértices e 4 arestas, sua densidade é:</strong>
+        <ol type="A">
+          <li>0,2</li>
+          <li>0,4</li>
+          <li>0,5</li>
+          <li>0,8</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <span class="tag basica">Básica</span>
+        <strong>8. A lista de adjacência é especialmente adequada para:</strong>
+        <ol type="A">
+          <li>grafos esparsos.</li>
+          <li>substituir qualquer algoritmo de percurso.</li>
+          <li>impedir ciclos.</li>
+          <li>ordenar automaticamente os vértices.</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <span class="tag basica">Básica</span>
+        <strong>9. A matriz de adjacência usa memória:</strong>
+        <ol type="A">
+          <li>O(V)</li>
+          <li>O(E)</li>
+          <li>O(V + E)</li>
+          <li>O(V²)</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <span class="tag intermediaria">Intermediária</span>
+        <strong>10. Qual representação testa a existência de uma aresta u−v em O(1), no modelo clássico?</strong>
+        <ol type="A">
+          <li>Lista de adjacência simples.</li>
+          <li>Matriz de adjacência.</li>
+          <li>Lista de arestas sem índice.</li>
+          <li>Pilha de vértices.</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <span class="tag basica">Básica</span>
+        <strong>11. A BFS usa principalmente qual estrutura?</strong>
+        <ol type="A">
+          <li>Pilha.</li>
+          <li>Fila.</li>
+          <li>Árvore binária.</li>
+          <li>Lista ordenada por grau.</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <span class="tag basica">Básica</span>
+        <strong>12. A DFS pode ser implementada naturalmente com:</strong>
+        <ol type="A">
+          <li>recursão ou pilha.</li>
+          <li>fila obrigatória.</li>
+          <li>matriz identidade.</li>
+          <li>busca binária.</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <span class="tag intermediaria">Intermediária</span>
+        <strong>13. Em grafos não ponderados, a BFS é adequada para:</strong>
+        <ol type="A">
+          <li>encontrar menor caminho em número de arestas.</li>
+          <li>resolver menor custo com pesos diferentes.</li>
+          <li>eliminar ciclos automaticamente.</li>
+          <li>calcular sempre uma ordem topológica.</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <span class="tag intermediaria">Intermediária</span>
+        <strong>14. Para o grafo 0:[1,2], 1:[0,3], 2:[0,3], 3:[1,2,4], 4:[3], uma BFS a partir de 0 produz quais distâncias?</strong>
+        <ol type="A">
+          <li>[0, 1, 1, 2, 3]</li>
+          <li>[0, 1, 2, 3, 4]</li>
+          <li>[0, 2, 1, 1, 2]</li>
+          <li>[1, 0, 0, 1, 2]</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <span class="tag intermediaria">Intermediária</span>
+        <strong>15. Se predecessores de uma BFS a partir de 0 são pred[1]=0, pred[2]=0, pred[3]=1, pred[4]=3, o caminho reconstruído até 4 é:</strong>
+        <ol type="A">
+          <li>0 → 2 → 3 → 4</li>
+          <li>0 → 1 → 3 → 4</li>
+          <li>4 → 3 → 1 → 0</li>
+          <li>0 → 4</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <span class="tag intermediaria">Intermediária</span>
+        <strong>16. Com lista de adjacência, BFS e DFS custam:</strong>
+        <ol type="A">
+          <li>O(V²)</li>
+          <li>O(E²)</li>
+          <li>O(V + E)</li>
+          <li>O(1)</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <span class="tag avancada">Avançada</span>
+        <strong>17. Em DFS para dígrafos, encontrar aresta de um vértice cinza para outro cinza indica:</strong>
+        <ol type="A">
+          <li>um vértice isolado.</li>
+          <li>um ciclo dirigido.</li>
+          <li>uma componente conexa obrigatória em grafo não direcionado.</li>
+          <li>uma ordem topológica válida.</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <span class="tag intermediaria">Intermediária</span>
+        <strong>18. Os estados branco, cinza e preto em DFS significam, respectivamente:</strong>
+        <ol type="A">
+          <li>finalizado, em processamento, não descoberto.</li>
+          <li>não descoberto, em processamento, finalizado.</li>
+          <li>na fila, fora da fila, removido.</li>
+          <li>grau zero, grau um, grau dois.</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <span class="tag intermediaria">Intermediária</span>
+        <strong>19. No grafo não direcionado com arestas 0−1, 1−2 e 3−4, quantas componentes conexas existem considerando vértices {0,1,2,3,4}?</strong>
+        <ol type="A">
+          <li>1</li>
+          <li>2</li>
+          <li>3</li>
+          <li>5</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <span class="tag basica">Básica</span>
+        <strong>20. Um vértice isolado em grafo não direcionado:</strong>
+        <ol type="A">
+          <li>não pertence a componente nenhuma.</li>
+          <li>forma uma componente conexa sozinho.</li>
+          <li>torna o grafo inválido.</li>
+          <li>obriga o uso de matriz.</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <span class="tag intermediaria">Intermediária</span>
+        <strong>21. Um DAG é:</strong>
+        <ol type="A">
+          <li>um grafo não direcionado completo.</li>
+          <li>um dígrafo acíclico.</li>
+          <li>uma matriz de adjacência densa.</li>
+          <li>uma BFS com predecessores.</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <span class="tag intermediaria">Intermediária</span>
+        <strong>22. Uma ordenação topológica de um dígrafo deve satisfazer:</strong>
+        <ol type="A">
+          <li>vértices de maior grau aparecem sempre primeiro.</li>
+          <li>para toda aresta u → v, u aparece antes de v.</li>
+          <li>todos os vértices ficam em ordem numérica.</li>
+          <li>o grafo passa a ser não direcionado.</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <span class="tag avancada">Avançada</span>
+        <strong>23. No algoritmo de Kahn, se a fila de vértices com grau de entrada zero esvazia antes de processar todos os vértices, isso indica:</strong>
+        <ol type="A">
+          <li>que a ordenação foi concluída com sucesso.</li>
+          <li>que há ciclo no dígrafo.</li>
+          <li>que o grafo é não direcionado.</li>
+          <li>que todas as arestas têm peso zero.</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <span class="tag avancada">Avançada</span>
+        <strong>24. Para as arestas A→C, B→C, C→D, qual ordem é topologicamente válida?</strong>
+        <ol type="A">
+          <li>C, A, B, D</li>
+          <li>A, B, C, D</li>
+          <li>D, C, B, A</li>
+          <li>A, C, B, D</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <span class="tag avancada">Avançada</span>
+        <strong>25. O dígrafo com arestas X→Y, Y→Z, Z→X possui ordenação topológica?</strong>
+        <ol type="A">
+          <li>Sim, X, Y, Z.</li>
+          <li>Sim, Z, Y, X.</li>
+          <li>Não, pois há ciclo dirigido.</li>
+          <li>Sim, desde que use matriz.</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <span class="tag intermediaria">Intermediária</span>
+        <strong>26. Resposta curta: explique por que um TAD de grafo deve validar os vértices antes de adicionar uma aresta.</strong>
+      </div>
+      <div class="questao">
+        <span class="tag intermediaria">Intermediária</span>
+        <strong>27. Resposta curta: para o grafo não direcionado com arestas 0−1, 0−2, 2−3 e 2−4, escreva a vizinhança e o grau do vértice 2.</strong>
+      </div>
+      <div class="questao">
+        <span class="tag avancada">Avançada</span>
+        <strong>28. Resposta curta: um grafo simples não direcionado com 6 vértices e 9 arestas tem qual densidade?</strong>
+      </div>
+      <div class="questao">
+        <span class="tag intermediaria">Intermediária</span>
+        <strong>29. Resposta curta: por que a reconstrução de caminho em BFS percorre o vetor de predecessores de trás para frente?</strong>
+      </div>
+      <div class="questao">
+        <span class="tag avancada">Avançada</span>
+        <strong>30. Resposta curta: em Kahn, o que deve ser concluído se apenas 4 de 6 vértices forem colocados na ordem final?</strong>
+      </div>
+    </section>
+
+    <section id="simulado">
+      <div class="section-head">
+        <div>
+          <h2>Mini-simulado</h2>
+          <p>Dez questões para treinar sob pressão. Sugestão: 20 minutos, sem consultar o resumo.</p>
+        </div>
+        <label class="concluido"><input type="checkbox" data-section="simulado"> seção concluída</label>
+      </div>
+
+      <div class="questao">
+        <strong>1. Em uma rede social não direcionada, pessoas são vértices e amizades são arestas. Uma componente conexa representa:</strong>
+        <ol type="A">
+          <li>um grupo em que qualquer pessoa alcança qualquer outra por uma sequência de amizades.</li>
+          <li>apenas pessoas com grau zero.</li>
+          <li>apenas amizades com peso.</li>
+          <li>uma fila de BFS.</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <strong>2. Para V={0,1,2,3,4,5} e arestas 0−1, 0−2, 1−3, 4−5, uma BFS a partir de 0 visita:</strong>
+        <ol type="A">
+          <li>todos os vértices.</li>
+          <li>0, 1, 2 e 3.</li>
+          <li>apenas 4 e 5.</li>
+          <li>apenas 0.</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <strong>3. No grafo da questão 2, quantas componentes conexas existem?</strong>
+        <ol type="A">
+          <li>1</li>
+          <li>2</li>
+          <li>3</li>
+          <li>6</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <strong>4. Se dist[5] = 3 após uma BFS a partir de s, isso significa:</strong>
+        <ol type="A">
+          <li>o caminho até 5 tem custo ponderado 3.</li>
+          <li>5 está a três arestas de s no menor caminho não ponderado.</li>
+          <li>5 tem grau 3.</li>
+          <li>5 foi finalizado no tempo 3 da DFS.</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <strong>5. Em uma DFS, tempos de finalização são úteis para:</strong>
+        <ol type="A">
+          <li>obter ordenação topológica em DAGs.</li>
+          <li>garantir menor caminho ponderado.</li>
+          <li>trocar lista por matriz.</li>
+          <li>calcular densidade diretamente.</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <strong>6. Um curso tem pré-requisitos: Algoritmos→Grafos, Matemática→Grafos, Grafos→IA. Uma ordem válida é:</strong>
+        <ol type="A">
+          <li>IA, Grafos, Algoritmos, Matemática.</li>
+          <li>Grafos, IA, Matemática, Algoritmos.</li>
+          <li>Algoritmos, Matemática, Grafos, IA.</li>
+          <li>Grafos, Algoritmos, Matemática, IA.</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <strong>7. Qual caso impede ordenação topológica?</strong>
+        <ol type="A">
+          <li>Dígrafo com ciclo A→B→C→A.</li>
+          <li>Dígrafo com dois vértices de grau de entrada zero.</li>
+          <li>Grafo esparso.</li>
+          <li>Lista de adjacência.</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <strong>8. Em um grafo simples não direcionado com 4 vértices e 3 arestas, a densidade é:</strong>
+        <ol type="A">
+          <li>3/4</li>
+          <li>3/6</li>
+          <li>4/3</li>
+          <li>6/3</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <strong>9. A melhor justificativa para preferir lista de adjacência em muitos problemas reais é:</strong>
+        <ol type="A">
+          <li>ela impede arestas duplicadas automaticamente.</li>
+          <li>ela usa O(V + E) memória e é eficiente em grafos esparsos.</li>
+          <li>ela testa qualquer aresta sempre em O(1), sem exceção.</li>
+          <li>ela só funciona para grafos ponderados.</li>
+        </ol>
+      </div>
+      <div class="questao">
+        <strong>10. No algoritmo de Kahn, o grau de entrada de um sucessor é reduzido quando:</strong>
+        <ol type="A">
+          <li>um predecessor é removido da fila e colocado na ordem.</li>
+          <li>o sucessor é pintado de cinza.</li>
+          <li>uma DFS finaliza todo o grafo.</li>
+          <li>uma matriz é criada.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="laboratorios">
+      <div class="section-head">
+        <div>
+          <h2>Laboratórios Guiados</h2>
+          <p>Atividades curtas para transformar teoria em procedimento.</p>
+        </div>
+        <label class="concluido"><input type="checkbox" data-section="laboratorios"> seção concluída</label>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h3>1. Implementar o TAD Grafo</h3>
+          <p>Crie uma estrutura com número de vértices, indicação de direção e lista de adjacência.</p>
+          <pre><code>Grafo(n, direcionado):
+  adj ← n listas vazias
+
+adicionar_aresta(u, v):
+  validar u e v
+  inserir v em adj[u]
+  se não direcionado:
+    inserir u em adj[v]</code></pre>
+        </div>
+        <div class="card">
+          <h3>2. Ler instâncias</h3>
+          <p>Use entrada no formato: primeira linha com n e m; depois m linhas com u e v. Para pesos, leia u, v e peso.</p>
+          <pre><code>ler n, m
+criar grafo
+repetir m vezes:
+  ler u, v
+  adicionar_aresta(u, v)</code></pre>
+        </div>
+        <div class="card">
+          <h3>3. Grau e vizinhança</h3>
+          <p>Para lista de adjacência, a vizinhança de v é adj[v]. Em grafo não direcionado, o grau é o tamanho dessa lista.</p>
+          <p><strong>Prática:</strong> para 0−1, 0−2, 1−3, calcule N(0), N(1), grau(0) e grau(3).</p>
+        </div>
+        <div class="card">
+          <h3>4. Executar BFS</h3>
+          <p>Use fila, vetor de visitados, distâncias e predecessores. Marque visitado quando o vértice entra na fila.</p>
+          <p><strong>Prática:</strong> no grafo 0:[1,2,3], 1:[0,4], 2:[0,5], 3:[0,6], encontre as camadas a partir de 0.</p>
+        </div>
+        <div class="card">
+          <h3>5. Reconstruir menor caminho</h3>
+          <p>Depois da BFS, siga predecessor[destino], predecessor[predecessor] até chegar à origem. Inverta a lista.</p>
+          <pre><code>caminho(destino):
+  resposta ← lista vazia
+  enquanto destino existir:
+    adicionar destino à resposta
+    destino ← predecessor[destino]
+  inverter resposta</code></pre>
+        </div>
+        <div class="card">
+          <h3>6. Executar DFS</h3>
+          <p>Escolha uma ordem de vizinhos e mantenha visitados. Anote descoberta e finalização para entender o retorno da recursão.</p>
+          <p><strong>Prática:</strong> execute DFS em 0:[1,2], 1:[0,3], 2:[0,4], 3:[1], 4:[2].</p>
+        </div>
+        <div class="card">
+          <h3>7. Detectar ciclos</h3>
+          <p>Em dígrafo, use cores: branco para não descoberto, cinza para em processamento e preto para finalizado. Aresta para cinza indica ciclo.</p>
+          <p><strong>Prática:</strong> teste A→B, B→C, C→A e explique por que não há topologia válida.</p>
+        </div>
+        <div class="card">
+          <h3>8. Componentes conexas</h3>
+          <p>Percorra todos os vértices. Ao encontrar um não visitado, rode BFS ou DFS e conte uma nova componente.</p>
+          <p><strong>Prática:</strong> para arestas 0−1, 1−2, 4−5 e vértice 3 isolado, liste as componentes.</p>
+        </div>
+        <div class="card">
+          <h3>9. Ordenação topológica</h3>
+          <p>Com Kahn, calcule graus de entrada, inicie a fila com grau zero e remova dependências aos poucos. Com DFS, use a ordem reversa de finalização.</p>
+          <p><strong>Prática:</strong> para A→C, B→C, C→D, encontre duas ordens válidas.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="revisao">
+      <div class="section-head">
+        <div>
+          <h2>Revisão Final</h2>
+          <p>Use esta parte nos últimos minutos antes da prova.</p>
+        </div>
+        <label class="concluido"><input type="checkbox" data-section="revisao"> seção concluída</label>
+      </div>
+
+      <h3>Checklist do que você deve saber</h3>
+      <ul class="checklist">
+        <li>Definir grafo, vértice, aresta, grau e vizinhança.</li>
+        <li>Diferenciar grafo direcionado e não direcionado.</li>
+        <li>Diferenciar grafo ponderado e não ponderado.</li>
+        <li>Escolher matriz ou lista de adjacência com justificativa.</li>
+        <li>Calcular grau, vizinhança e densidade.</li>
+        <li>Executar BFS com fila, distâncias e predecessores.</li>
+        <li>Reconstruir caminho a partir de predecessores.</li>
+        <li>Executar DFS com recursão ou pilha.</li>
+        <li>Interpretar branco, cinza e preto.</li>
+        <li>Detectar ciclo dirigido com DFS.</li>
+        <li>Contar componentes conexas em grafo não direcionado.</li>
+        <li>Reconhecer DAG e ordenação topológica.</li>
+        <li>Aplicar Kahn e detectar ciclo por falha de processamento total.</li>
+        <li>Usar DFS para topologia por ordem reversa de finalização.</li>
+      </ul>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Armadilhas comuns</h3>
+          <ul>
+            <li>Confundir BFS com DFS por causa da ordem de vizinhos.</li>
+            <li>Esquecer que BFS só dá menor caminho sem pesos.</li>
+            <li>Marcar visitado só ao remover da fila e inserir o mesmo vértice várias vezes.</li>
+            <li>Contar vértice isolado como “sem componente”.</li>
+            <li>Aceitar topologia em dígrafo com ciclo.</li>
+            <li>Usar matriz para grafo enorme e esparso sem justificar memória.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Como revisar em 30 minutos</h3>
+          <ol>
+            <li><strong>5 min:</strong> leia glossário e tabela de representações.</li>
+            <li><strong>8 min:</strong> faça flashcards de BFS, DFS e topologia.</li>
+            <li><strong>10 min:</strong> resolva uma questão de BFS, uma de componentes e uma de Kahn.</li>
+            <li><strong>7 min:</strong> confira o gabarito comentado e anote os erros.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section id="gabarito">
+      <div class="section-head">
+        <div>
+          <h2>Gabarito</h2>
+          <p>Abra somente depois de resolver as questões e o mini-simulado.</p>
+        </div>
+        <label class="concluido"><input type="checkbox" data-section="gabarito"> seção concluída</label>
+      </div>
+
+      <button class="botao" type="button" data-toggle="gab-questoes">Mostrar / ocultar gabarito das questões</button>
+      <div class="painel-oculto" id="gab-questoes">
+        <h3>Questões de treino — respostas comentadas</h3>
+        <ol>
+          <li><strong>A.</strong> Grafo é definido por vértices e arestas.</li>
+          <li><strong>C.</strong> Em grafo não direcionado, a relação vale nos dois sentidos.</li>
+          <li><strong>A.</strong> Em dígrafo, a direção da aresta importa.</li>
+          <li><strong>B.</strong> O vértice 3 é adjacente a 1, 2 e 4.</li>
+          <li><strong>B.</strong> O vértice 0 possui arestas para 1 e 2.</li>
+          <li><strong>C.</strong> O máximo é 5·4/2 = 10.</li>
+          <li><strong>B.</strong> Densidade = 4/10 = 0,4.</li>
+          <li><strong>A.</strong> Lista de adjacência usa O(V + E), boa para grafos esparsos.</li>
+          <li><strong>D.</strong> A matriz tem V linhas e V colunas.</li>
+          <li><strong>B.</strong> A matriz acessa diretamente a posição [u][v].</li>
+          <li><strong>B.</strong> BFS usa fila.</li>
+          <li><strong>A.</strong> DFS combina naturalmente com recursão ou pilha.</li>
+          <li><strong>A.</strong> Em grafo não ponderado, BFS minimiza quantidade de arestas.</li>
+          <li><strong>A.</strong> As camadas são 0; 1 e 2; 3; 4.</li>
+          <li><strong>B.</strong> Seguindo predecessores de 4: 4←3←1←0; invertendo, 0→1→3→4.</li>
+          <li><strong>C.</strong> Com lista de adjacência, cada vértice e aresta é examinado poucas vezes.</li>
+          <li><strong>B.</strong> Em dígrafo, aresta para vértice cinza revela retorno para a pilha ativa.</li>
+          <li><strong>B.</strong> Branco: não descoberto; cinza: em processamento; preto: finalizado.</li>
+          <li><strong>B.</strong> As componentes são {0,1,2} e {3,4}.</li>
+          <li><strong>B.</strong> Um vértice isolado é uma componente de tamanho 1.</li>
+          <li><strong>B.</strong> DAG significa dígrafo acíclico.</li>
+          <li><strong>B.</strong> A dependência u→v exige u antes de v.</li>
+          <li><strong>B.</strong> Se Kahn trava antes de processar todos os vértices, há ciclo.</li>
+          <li><strong>B.</strong> A e B podem vir antes de C; C vem antes de D.</li>
+          <li><strong>C.</strong> X→Y→Z→X é ciclo dirigido, portanto não há ordenação topológica.</li>
+          <li><strong>Resposta esperada:</strong> para impedir acesso fora do intervalo, arestas com vértices inexistentes e corrupção da representação interna.</li>
+          <li><strong>Resposta esperada:</strong> N(2) = {0, 3, 4}; grau(2) = 3.</li>
+          <li><strong>Resposta esperada:</strong> o máximo de arestas é 6·5/2 = 15; densidade = 9/15 = 0,6.</li>
+          <li><strong>Resposta esperada:</strong> porque cada predecessor aponta para o vértice anterior no caminho; partindo do destino, voltamos até a origem e depois invertemos.</li>
+          <li><strong>Resposta esperada:</strong> há ciclo ou dependência circular entre os vértices restantes; portanto não existe ordenação topológica completa.</li>
+        </ol>
+      </div>
+
+      <button class="botao" type="button" data-toggle="gab-simulado">Mostrar / ocultar gabarito do mini-simulado</button>
+      <div class="painel-oculto" id="gab-simulado">
+        <h3>Mini-simulado — gabarito final</h3>
+        <p><strong>1-A, 2-B, 3-B, 4-B, 5-A, 6-C, 7-A, 8-B, 9-B, 10-A.</strong></p>
+        <h3>Correção comentada</h3>
+        <ol>
+          <li><strong>A.</strong> Componente conexa é um grupo máximo alcançável por caminhos; não exige amizade direta entre todos.</li>
+          <li><strong>B.</strong> A BFS iniciada em 0 alcança 0, 1, 2 e 3; não atravessa para 4 e 5.</li>
+          <li><strong>B.</strong> Existem duas componentes: {0,1,2,3} e {4,5}. O vértice 5 não está isolado, pois está ligado a 4.</li>
+          <li><strong>B.</strong> Em BFS sem pesos, distância 3 significa três arestas no menor caminho.</li>
+          <li><strong>A.</strong> Em DAG, a ordem reversa de finalização da DFS gera topologia.</li>
+          <li><strong>C.</strong> Algoritmos e Matemática precisam vir antes de Grafos; Grafos antes de IA.</li>
+          <li><strong>A.</strong> Ciclo dirigido impede uma ordem linear que respeite todas as dependências.</li>
+          <li><strong>B.</strong> Com 4 vértices, máximo de arestas é 4·3/2 = 6; densidade = 3/6.</li>
+          <li><strong>B.</strong> Esse é o principal ganho da lista de adjacência em grafos esparsos.</li>
+          <li><strong>A.</strong> Ao remover um predecessor da ordem, suas arestas deixam de bloquear os sucessores.</li>
+        </ol>
+      </div>
+
+      <div class="destaque sucesso">
+        <strong>Fontes locais usadas:</strong> 2026s1_ED2-aula004-grafos.pdf, 2026s1_ED2-005-implementacao_grafos.pdf, 2026s1_ED2-005-grafos_exemplos.pdf, 2026s1_ED2-006-caminhoMinimo.pdf e 2026s1_ED2-lista-estudos.pdf.
+      </div>
+    </section>
+
+    <footer>
+      Página autocontida para estudo de grafos. Pode ser aberta diretamente no navegador e impressa.
+    </footer>
+  </div>
+
+  <script>
+    const flashcards = [
+      ["O que é um grafo?", "Uma estrutura G = (V, E), formada por vértices e arestas que representam relações."],
+      ["O que é grau em grafo não direcionado?", "É o número de arestas incidentes em um vértice."],
+      ["O que muda em um dígrafo?", "As arestas têm direção; u → v não implica v → u."],
+      ["Quando um grafo é ponderado?", "Quando cada aresta possui peso, custo, distância ou tempo associado."],
+      ["Qual a vantagem da matriz de adjacência?", "Testar existência de aresta em O(1)."],
+      ["Qual a desvantagem da matriz de adjacência?", "Usa O(V²) memória, mesmo que existam poucas arestas."],
+      ["Qual a vantagem da lista de adjacência?", "Usa O(V + E) memória e percorre vizinhos em O(grau(v))."],
+      ["Qual estrutura a BFS usa?", "Fila."],
+      ["Por que a BFS encontra menor caminho sem pesos?", "Porque visita os vértices em camadas de distância crescente."],
+      ["Para que serve o vetor de predecessores?", "Para reconstruir o caminho descoberto até um destino."],
+      ["Qual estrutura a DFS usa?", "Pilha explícita ou pilha de chamadas da recursão."],
+      ["O que é retorno na DFS?", "É a volta quando um ramo não possui mais vizinhos novos."],
+      ["O que significa cor branca na DFS?", "Vértice ainda não descoberto."],
+      ["O que significa cor cinza na DFS?", "Vértice descoberto, mas ainda em processamento."],
+      ["O que significa cor preta na DFS?", "Vértice finalizado."],
+      ["Como detectar ciclo em dígrafo com DFS?", "Ao encontrar aresta para um vértice cinza."],
+      ["O que é componente conexa?", "Um conjunto máximo de vértices alcançáveis entre si em grafo não direcionado."],
+      ["Como contar componentes conexas?", "Rode BFS ou DFS a partir de cada vértice ainda não visitado e conte as chamadas iniciadas."],
+      ["O que é um DAG?", "Um grafo direcionado sem ciclos dirigidos."],
+      ["O que é ordenação topológica?", "Uma ordem em que toda aresta u → v coloca u antes de v."],
+      ["Qual é a ideia do algoritmo de Kahn?", "Processar vértices com grau de entrada zero e reduzir os graus dos sucessores."],
+      ["Quando Kahn detecta ciclo?", "Quando não processa todos os vértices porque não há mais grau de entrada zero."],
+      ["Como usar DFS para topologia?", "Adicionar vértices ao final quando terminam e inverter a ordem de finalização."],
+      ["Qual erro comum sobre BFS?", "Achar que resolve menor custo em grafos com pesos diferentes."],
+      ["Qual a complexidade de BFS e DFS com lista de adjacência?", "O(V + E)."]
+    ];
+
+    const listaFlashcards = document.getElementById("listaFlashcards");
+    flashcards.forEach((item, indice) => {
+      const cartao = document.createElement("button");
+      cartao.type = "button";
+      cartao.className = "flashcard";
+      cartao.setAttribute("aria-label", "Virar flashcard " + (indice + 1));
+      cartao.innerHTML = `
+        <span class="flash-inner">
+          <span class="frente"><small>Pergunta ${indice + 1}</small><strong>${item[0]}</strong><small>Clique para ver a resposta</small></span>
+          <span class="verso"><small>Resposta</small><strong>${item[1]}</strong><small>Clique para voltar</small></span>
+        </span>`;
+      cartao.addEventListener("click", () => cartao.classList.toggle("virado"));
+      listaFlashcards.appendChild(cartao);
+    });
+
+    document.getElementById("resetFlashcards").addEventListener("click", () => {
+      document.querySelectorAll(".flashcard").forEach(cartao => cartao.classList.remove("virado"));
+    });
+
+    document.querySelectorAll("[data-toggle]").forEach(botao => {
+      botao.addEventListener("click", () => {
+        const alvo = document.getElementById(botao.dataset.toggle);
+        alvo.classList.toggle("aberto");
+      });
+    });
+
+    const caixas = document.querySelectorAll("[data-section]");
+    const barra = document.getElementById("barraProgresso");
+    const texto = document.getElementById("textoProgresso");
+
+    function atualizarProgresso() {
+      const total = caixas.length;
+      const marcadas = Array.from(caixas).filter(caixa => caixa.checked).length;
+      barra.max = total;
+      barra.value = marcadas;
+      texto.textContent = `${marcadas} de ${total} seções`;
+    }
+
+    caixas.forEach(caixa => {
+      const chave = "grafos_secao_" + caixa.dataset.section;
+      caixa.checked = localStorage.getItem(chave) === "1";
+      caixa.addEventListener("change", () => {
+        localStorage.setItem(chave, caixa.checked ? "1" : "0");
+        atualizarProgresso();
+      });
+    });
+    atualizarProgresso();
+  </script>
+</body>
+</html>
